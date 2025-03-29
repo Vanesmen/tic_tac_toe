@@ -1,28 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
-  <!-- Don't use this in production: -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <title>Document</title>
-</head>
-
-<body>
-  <div id="root"></div>
-  <script type="text/babel">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
 
     const SYMBOL_X = 'X';
     const SYMBOL_O = 'O';
 
+    const checkWinner = (cells) => {
+        const winnerCoombs = [
+          [0, 1, 2],
+          [3, 4, 5],
+          [6, 7, 8],
+          [0, 3, 6],
+          [1, 4, 7],
+          [2, 5, 8],
+          [0, 4, 8],
+          [2, 4, 6],
+        ]
+
+        let winner = null;
+        let winnerCoomb = [];
+
+        for (const coomb of winnerCoombs) {
+          let currentCoomb = [];
+
+          coomb.forEach((elIndex, i) => {
+            currentCoomb[i] = cells[elIndex];
+          });
+
+          if (new Set(currentCoomb).size === 1 && !!currentCoomb[0]) {
+            winner = currentCoomb[0];
+            winnerCoomb = coomb;
+
+            return [winner, winnerCoomb];
+          }
+        }
+
+        return [null, []];
+    }
+
     function App() {
-      const cells = [SYMBOL_O, null, null, SYMBOL_O, SYMBOL_X, null, null, null, null];
-      const currentStep = SYMBOL_O;
+      const [currentStep, setCurrentStep] = React.useState(SYMBOL_O);
+      const [cells, setCells] = React.useState([null, null, null, null, null, null, null, null, null]);
+
+      const [winnerSymbol, setWinnerSymbol] = React.useState(null);
+      const [winnerCoomb, setWinnerCoomb] = React.useState([]);
+      const [isDraw, setIsDraw] = React.useState(false);
 
       const getSymbolClassName = (symbol) => {
         if(symbol === SYMBOL_O) return 'symbol--o';
@@ -32,25 +66,67 @@
 
       const renderSymbol = (symbol) => <span className={`symbol ${getSymbolClassName(symbol)}`}>{symbol}</span>
 
+      const handleCellClick = (index) => {
+        if (cells[index] || winnerSymbol || isDraw) {
+          return;
+        }
+        
+        const newCells = [...cells];
+        newCells[index] = currentStep;
+
+        setCells(newCells);
+        setCurrentStep(currentStep === SYMBOL_X ? SYMBOL_O : SYMBOL_X);
+
+        const [newWinnerSymbol, newWinnerCoomb] = checkWinner(newCells);
+
+        setWinnerSymbol(newWinnerSymbol);
+        setWinnerCoomb(newWinnerCoomb);
+
+        if (newCells.find(el => el === null) !== null && !newWinnerSymbol) {
+          setIsDraw(true);
+        }
+      }
+
+      const handleReset = () => {
+        setWinnerSymbol(null);
+        setWinnerCoomb([]);
+        setCells([null, null, null, null, null, null, null, null, null]);
+        setIsDraw(false);
+      }
+
       return (
         <div className="game">
-          <div className="game-info">
-            Ход: {renderSymbol(currentStep)}
-          </div>
+          {
+            isDraw
+              ? <div className="game-info">Ничья</div>
+              : <div className="game-info">
+                  {winnerSymbol ? 'Победитель' : 'Ход'} {renderSymbol(winnerSymbol || currentStep)}
+                </div>
+          }
           <div className="game-field">
             {cells.map((symbol, index) => {
-              return <button key={index} className="cell">{symbol ? renderSymbol(symbol) : null}</button>
+              const isWinner = winnerCoomb.includes(index);
+
+              return (
+                <button
+                  key={index}
+                  className={`cell ${isWinner ? 'cell--win': ''}`}
+                  onClick={() => handleCellClick(index)}
+                >
+                  {symbol ? renderSymbol(symbol) : null}
+                </button>
+              )
             })}
           </div>
+          <button className="reset-button" onClick={handleReset}>Сброс</button>
         </div>
       )
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
-
-  </script>
-  <style>
+    </script>
+    <style>
     html {
       font-family: Arial, Helvetica, sans-serif;
     }
@@ -101,7 +177,10 @@
     .symbol--o {
       color: green;
     }
-  </style>
-</body>
 
+    .reset-button {
+      margin-top: 16px;
+    }
+    </style>
+  </body>
 </html>
