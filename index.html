@@ -56,7 +56,8 @@
 
       const [winnerSymbol, setWinnerSymbol] = React.useState(null);
       const [winnerCoomb, setWinnerCoomb] = React.useState([]);
-      const [isDraw, setIsDraw] = React.useState(false);
+
+      const isDraw = cells.find(el => el === null) !== null && !winnerSymbol;
 
       const handleCellClick = (index) => {
         if (cells[index] || winnerSymbol || isDraw) {
@@ -73,17 +74,12 @@
 
         setWinnerSymbol(newWinnerSymbol);
         setWinnerCoomb(newWinnerCoomb);
-
-        if (newCells.find(el => el === null) !== null && !newWinnerSymbol) {
-          setIsDraw(true);
-        }
       }
 
       const handleReset = () => {
         setWinnerSymbol(null);
         setWinnerCoomb([]);
         setCells([null, null, null, null, null, null, null, null, null]);
-        setIsDraw(false);
       }
 
       return {
@@ -111,7 +107,7 @@
       return (
         <div className="game">
           <GameInfo isDraw={isDraw} winnerSymbol={winnerSymbol} currentStep={currentStep}/>
-          
+
           <div className="game-field">
             {cells.map((symbol, index) => (
               <GameCell
