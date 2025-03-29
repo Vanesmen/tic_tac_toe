@@ -50,7 +50,7 @@
         return [null, []];
     }
 
-    function App() {
+    function useGameState() {
       const [currentStep, setCurrentStep] = React.useState(SYMBOL_O);
       const [cells, setCells] = React.useState([null, null, null, null, null, null, null, null, null]);
 
@@ -86,9 +86,32 @@
         setIsDraw(false);
       }
 
+      return {
+        currentStep,
+        cells,
+        winnerSymbol,
+        winnerCoomb,
+        isDraw,
+        handleCellClick,
+        handleReset
+      }
+    }
+
+    function App() {
+      const {
+        currentStep,
+        cells,
+        winnerSymbol,
+        winnerCoomb,
+        isDraw,
+        handleCellClick,
+        handleReset
+      } = useGameState();
+
       return (
         <div className="game">
           <GameInfo isDraw={isDraw} winnerSymbol={winnerSymbol} currentStep={currentStep}/>
+          
           <div className="game-field">
             {cells.map((symbol, index) => (
               <GameCell
