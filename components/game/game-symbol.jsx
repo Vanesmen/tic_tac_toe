@@ -1,17 +1,16 @@
-import { SYMBOL_X, SYMBOL_O } from "./constants";
-import styles from "./game.module.css";
+import { GAME_SYMBOLS } from "./constants";
+import { CrossIcon } from "./icons/cross-icon";
+import { SquareIcon } from "./icons/square-icon";
+import { TriangleIcon } from "./icons/triangle-icon";
+import { ZeroIcon } from "./icons/zero-icon";
 
-export function GameSymbol({ symbol }) {
-  const getSymbolClassName = (symbol) => {
-    if (symbol === SYMBOL_O) return styles["symbol--o"];
-    if (symbol === SYMBOL_X) return styles["symbol--x"];
+export function GameSymbol({ symbol, className }) {
+  const Icon = {
+    [GAME_SYMBOLS.CROSS]: CrossIcon,
+    [GAME_SYMBOLS.ZERO]: ZeroIcon,
+    [GAME_SYMBOLS.TRIANGLE]: TriangleIcon,
+    [GAME_SYMBOLS.SQUARE]: SquareIcon,
+  }[symbol] || CrossIcon;
 
-    return "";
-  };
-
-  return (
-    <span className={`${styles["symbol"]} ${getSymbolClassName(symbol)}`}>
-      {symbol}
-    </span>
-  );
+  return <Icon className={className}/>;
 }

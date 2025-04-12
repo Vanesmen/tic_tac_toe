@@ -1,78 +1,29 @@
 import { useState } from "react";
-import { SYMBOL_O, SYMBOL_X } from "./constants";
+import { GAME_SYMBOLS, MOVE_ORDER } from "./constants";
 
-const checkWinner = (cells) => {
-  const winnerCoombs = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
+function getNextMove(currentMove) {
+  const nextMoveIndex = MOVE_ORDER.indexOf(currentMove) + 1;
 
-  let winner = null;
-  let winnerCoomb = [];
-
-  for (const coomb of winnerCoombs) {
-    let currentCoomb = [];
-
-    coomb.forEach((elIndex, i) => {
-      currentCoomb[i] = cells[elIndex];
-    });
-
-    if (new Set(currentCoomb).size === 1 && !!currentCoomb[0]) {
-      winner = currentCoomb[0];
-      winnerCoomb = coomb;
-
-      return [winner, winnerCoomb];
-    }
-  }
-
-  return [null, []];
-};
+  return MOVE_ORDER[nextMoveIndex] || MOVE_ORDER[0];
+}
 
 export function useGameState() {
-  const [currentStep, setCurrentStep] = useState(SYMBOL_O);
-  const [cells, setCells] = useState(new Array(9).fill(null));
-
-  const [winnerSymbol, setWinnerSymbol] = useState(null);
-  const [winnerCoomb, setWinnerCoomb] = useState([]);
-
-  const isDraw = cells.find((el) => el === null) !== null && !winnerSymbol;
+  const [{cells, currentMove}, setGameState] = useState(() => ({
+      cells: new Array(19 * 19).fill(null),
+      currentMove: GAME_SYMBOLS.CROSS,
+    }));
+  
+  const nextMove = getNextMove(currentMove);
 
   const handleCellClick = (index) => {
-    if (cells[index] || winnerSymbol || isDraw) {
-      return;
-    }
+    if (cells[index]) return;
 
-    const newCells = [...cells];
-    newCells[index] = currentStep;
-
-    setCells(newCells);
-    setCurrentStep(currentStep === SYMBOL_X ? SYMBOL_O : SYMBOL_X);
-
-    const [newWinnerSymbol, newWinnerCoomb] = checkWinner(newCells);
-
-    setWinnerSymbol(newWinnerSymbol);
-    setWinnerCoomb(newWinnerCoomb);
+    setGameState((lastGameState) => ({
+      ...lastGameState,
+      currentMove: getNextMove(lastGameState.currentMove),
+      cells: lastGameState.cells.map((cell, i) => i === index ? lastGameState.currentMove : cell)
+    }));
   };
 
-  const handleReset = () => {
-    setWinnerSymbol(null);
-    setWinnerCoomb([]);
-    setCells([null, null, null, null, null, null, null, null, null]);
-  };
-
-  return {
-    currentStep,
-    cells,
-    winnerSymbol,
-    winnerCoomb,
-    isDraw,
-    handleCellClick,
-    handleReset,
-  };
+  return {cells, currentMove, nextMove, handleCellClick}
 }
