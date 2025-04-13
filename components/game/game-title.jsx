@@ -4,7 +4,7 @@ import { StarIcon } from "./icons/star-icon";
 import { UserIcon } from "./icons/user-icon";
 import { HistoryIcon } from "./icons/history-icon";
 
-export const GameTitle = () => {
+export const GameTitle = ({ playersCount }) => {
   return (
     <div className="pl-2">
       <Link href="#" className="flex items-center gap-2 text-teal-600 text-xs -mb-0.5">
@@ -17,7 +17,7 @@ export const GameTitle = () => {
 
         <div className="flex items-center gap-1">
           <UserIcon/>
-          2
+          {playersCount}
         </div>
 
         <div className="flex items-center gap-1">

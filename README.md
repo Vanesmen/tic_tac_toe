@@ -2,4 +2,4 @@
 Tic tac toe online game on react
 
 // Локальный запуск проекта
-npx next dev
+npm run dev
