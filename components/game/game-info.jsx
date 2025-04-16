@@ -12,7 +12,7 @@ const players = [
   {id: 4, name: "Не Иван 3", rating: 1488, avatar: avatarSrc, symbol: GAME_SYMBOLS.SQUARE},
 ]
 
-export function GameInfo({ className, playersCount, curruntMove }) {
+export function GameInfo({ className, playersCount, curruntMove, isWinner, onPlayerTimeOver }) {
   return (
     <div className={clsx(className, "grid grid-cols-2 gap-3 bg-white rounded-2xl shadow-md px-8 py-4")}>
       {
@@ -21,7 +21,8 @@ export function GameInfo({ className, playersCount, curruntMove }) {
             key={player.id}
             palyerInfo={player}
             isReverse={index % 2}
-            isTimerRunning={curruntMove === player.symbol}
+            isTimerRunning={curruntMove === player.symbol && !isWinner}
+            onTimeOver={() => onPlayerTimeOver(player.symbol)}
           />
         ))
       }
@@ -29,8 +30,8 @@ export function GameInfo({ className, playersCount, curruntMove }) {
   )
 }
 
-function PlayerInfo({ palyerInfo, isReverse, isTimerRunning }) {
-  const [seconds, setSeconds] = useState(60);
+function PlayerInfo({ palyerInfo, isReverse, isTimerRunning, onTimeOver }) {
+  const [seconds, setSeconds] = useState(5);
 
   const minutesString = String(Math.floor(seconds / 60)).padStart(2, "0");
   const secondsString = String(Math.floor(seconds % 60)).padStart(2, "0");
@@ -41,15 +42,22 @@ function PlayerInfo({ palyerInfo, isReverse, isTimerRunning }) {
     if (isTimerRunning) {
       const interval = setInterval(() => {
         setSeconds(s => Math.max(s - 1, 0));
-      }, 600);
+      }, 1000);
 
       return () => {
-        setSeconds(60);
+        setSeconds(5);
         clearInterval(interval);
       };
     }
     
   }, [isTimerRunning]);
+
+  useEffect(() => {
+    if (seconds <= 0) {
+      onTimeOver();
+    }
+
+  }, [seconds]);
 
   const getTimerColor = () => {
     if (isTimerRunning) {
